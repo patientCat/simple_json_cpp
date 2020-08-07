@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 
+
 struct JsonTree {
 
 };
@@ -27,15 +28,15 @@ struct {
 
 class JsonParse {
   public:
-    // ½«JsonÎÄ±¾½âÎö³ÉJsonÊ÷
-    // ×îºÃ²»ÒªÒÀÀµ×Ö·û´®µÄ'\0'×Ö·û£¬¶øÊÇÊ¹ÓÃsizeÀ´×ö
+    // å°†Jsonæ–‡æœ¬è§£ææˆJsonæ ‘
+    // æœ€å¥½ä¸è¦ä¾èµ–å­—ç¬¦ä¸²çš„'\0'å­—ç¬¦ï¼Œè€Œæ˜¯ä½¿ç”¨sizeæ¥åš
     void skip_space() {
         while ( curr_index_ != size_ && isspace( context_[curr_index_] ) ) {
             curr_index_++;
         }
     }
 
-    // ÕâÀïµÄÓï·¨ÊÇ ws value ws  , wsÖ¸¿Õ°×·û
+    // è¿™é‡Œçš„è¯­æ³•æ˜¯ ws value ws  , wsæŒ‡ç©ºç™½ç¬¦
     JParseError parse( const char *context, int size ) {
         context_ = context;
         size_ = size;
@@ -82,7 +83,7 @@ class JsonParse {
             return LEPT_PARSE_INVALID_VALUE;
         }
     }
-    // ¸ù¾İ×´Ì¬×ªÒÆÍ¼£¬ºÜÈİÒ××önumberµÄ½âÎö
+    // æ ¹æ®çŠ¶æ€è½¬ç§»å›¾ï¼Œå¾ˆå®¹æ˜“åšnumberçš„è§£æ
     //
     enum NumberState {
         NEGATIVE,
@@ -137,7 +138,7 @@ class JsonParse {
     JParseError parse_number() {
         NumberState prev_state = START;
         double K = 0.1;
-        // ×´Ì¬Óöµ½²»Í¬µÄÖµ·¢Éú²»Í¬µÄ±ä»¯
+        // çŠ¶æ€é‡åˆ°ä¸åŒçš„å€¼å‘ç”Ÿä¸åŒçš„å˜åŒ–
         while ( curr_index_ != size_ ) {
             char curr_char = context_[curr_index_];
             if ( isspace( curr_char ) ) {
@@ -146,7 +147,7 @@ class JsonParse {
             }
 
             auto index_of_curr_char = get_state_index( curr_char );
-            if ( index_of_curr_char == -1 ) /*´ú±íÊÕµ½ÎŞĞ§µÄ×´Ì¬*/
+            if ( index_of_curr_char == -1 ) /*ä»£è¡¨æ”¶åˆ°æ— æ•ˆçš„çŠ¶æ€*/
                 break;
             auto curr_state = get_status_table().at( prev_state ).at( index_of_curr_char );
             prev_state = curr_state;
@@ -159,7 +160,7 @@ class JsonParse {
             if ( prev_state == NEGATIVE ) {
                 integral_part_flag_ = -1;
             } else if ( prev_state ==  ZERO || prev_state == DIGIT1_9|| prev_state == DIGIT ) {
-                // ÕâÀïÒª¼ÆËãÈı²¿·ÖµÄ¶«Î÷
+                // è¿™é‡Œè¦è®¡ç®—ä¸‰éƒ¨åˆ†çš„ä¸œè¥¿
                 int curr_num = curr_char - '0';
                 switch ( res_num_status_ ) {
                 case JsonParse::INTEGRAL:
@@ -191,7 +192,7 @@ class JsonParse {
         }
         return LEPT_PARSE_INVALID_VALUE;
     }
-    // ½âÎö×Ö·û´®£¬×¢Òâ×ªÒå×Ö·ûµÄ´¦Àí
+    // è§£æå­—ç¬¦ä¸²ï¼Œæ³¨æ„è½¬ä¹‰å­—ç¬¦çš„å¤„ç†
     /*
        %x22 /          ; "    quotation mark  U+0022
        %x5C /          ; \    reverse solidus U+005C
@@ -230,7 +231,7 @@ class JsonParse {
         }
         return true;
     }
-    // ½âÎöJson¶ÔÏó
+    // è§£æJsonå¯¹è±¡
     JParseError parse_object() {
 
         // expect
@@ -242,7 +243,7 @@ class JsonParse {
         }
         JParseError err;
         for ( ;; ) {
-            // ½âÎökey
+            // è§£ækey
             if ( ( err = parse_string() ) != LEPT_PARSE_OK )
                 break;
             std::string str = str_;
@@ -250,28 +251,28 @@ class JsonParse {
 
             skip_space();
 
-            // ½âÎö·ÖºÅ
+            // è§£æåˆ†å·
             if ( context_[curr_index_++] != ':' )
                 break;
 
             skip_space();
-            // ½âÎövalue
+            // è§£ævalue
             if ( ( err = parse_value() ) != LEPT_PARSE_OK )
                 break;
 
             skip_space();
 
-            // ½âÎö',' ×¢Òâ×îºóÒ»ĞĞ²»¿ÉÒÔÓĞ,
+            // è§£æ',' æ³¨æ„æœ€åä¸€è¡Œä¸å¯ä»¥æœ‰,
             if ( context_[curr_index_++] != ',' )
                 break;
 
             skip_space();
-            // ½«key-value ¼ÓÈëmap
+            // å°†key-value åŠ å…¥map
             object_;
         }
     }
     JParseError parse_string() {
-        curr_index_++; // Ìø¹ıÆğÊ¼µÄ\"
+        curr_index_++; // è·³è¿‡èµ·å§‹çš„\"
         char curr_char = context_[curr_index_];
         char next_char = context_[curr_index_ + 1];
         bool is_ok;
@@ -305,7 +306,7 @@ class JsonParse {
         type_ = type;
         return LEPT_PARSE_OK;
     }
-    // ¸ù¾İkeyÀ´»ñµÃÊı¾İ
+    // æ ¹æ®keyæ¥è·å¾—æ•°æ®
     JsonType get_type() const {
         return type_;
     }
@@ -315,11 +316,11 @@ class JsonParse {
     bool get_boolean() const {
 
         if ( type_ == JsonType::JSON_FALSE || type_ == JsonType::JSON_TRUE )
-            throw std::logic_error( "½âÎö´íÎó: ²»ÊÇboolÀàĞÍ" );
+            throw std::logic_error( "è§£æé”™è¯¯: ä¸æ˜¯boolç±»å‹" );
         return type_ == JsonType::JSON_FALSE ? false : true;
     }
     double get_num() const {
-        throw std::logic_error( "½âÎö´íÎó: ²»ÊÇnumberÀàĞÍ" );
+        throw std::logic_error( "è§£æé”™è¯¯: ä¸æ˜¯numberç±»å‹" );
         double res =  integral_part_flag_ * ( integral_part_ + fractional_part_ ) * pow( 10, exponential_part_flag_ * exponential_part_ );
         return res;
     }
